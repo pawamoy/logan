@@ -1,0 +1,68 @@
+version: '3'
+
+
+networks:
+  web_network: {}
+  cache_network: {}
+  db_network: {}
+
+
+volumes:
+  media: {}
+  static: {}
+  data: {}
+
+
+services:
+
+  # reverse proxy container (nginx)
+  nginx:
+    image: nginx:1.13
+    ports:
+      - 8000:80
+    volumes:
+      - ./docker/services/nginx/development/conf.d:/etc/nginx/conf.d
+      - media:/opt/services/djangoapp/media
+      - static:/opt/services/djangoapp/static
+    networks:
+      - web_network
+    depends_on:
+      - djangoapp
+
+  # web container, with django + gunicorn
+  djangoapp:
+    build:
+      context: .
+      dockerfile: ./docker/Dockerfile
+      args:
+        ci: "true"
+    environment:
+      - DJANGO_SETTINGS_MODULE
+      - POSTGRES_PASSWORD=db_password
+    volumes:
+      - .:/opt/services/djangoapp/src
+      - media:/opt/services/djangoapp/media
+      - static:/opt/services/djangoapp/static
+    networks:
+      - db_network
+      - web_network
+      - cache_network
+    depends_on:
+      - postgres
+      - memcached
+
+  # cache server (memcached)
+  memcached:
+    image: memcached:1.5
+    networks:
+      - cache_network
+
+  # database containers, one for each db
+  postgres:
+    image: postgres:10
+    volumes:
+      - data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_PASSWORD=db_password
+    networks:
+      - db_network

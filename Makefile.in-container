@@ -1,0 +1,79 @@
+.PHONY: build-docs help mkdir-build
+.DEFAULT_GOAL := help
+
+# Building rules ----------------------------------------------------------------------------------
+build-database: ## Migrate the application database (create or alter tables).
+	logan/manage.py migrate
+
+build-initial-migrations: ## Create the initial database migrations.
+	logan/manage.py makemigrations logan
+
+build-superuser: ## Create a super user in the application database.
+	logan/manage.py createsuperuser
+
+build-docs: ## Build the documentation.
+	sphinx-build -E -b html docs build/docs
+
+# Running rules -----------------------------------------------------------------------------------
+python: ## Launch a Python shell in the djangoapp container.
+	logan/manage.py shell_plus
+
+# Updating rules ----------------------------------------------------------------------------------
+load-fixtures: ## Install the fixtures in the database.
+	./scripts/delete_content_types
+	./scripts/load_fixtures
+
+load-warehouse: ## Reload the questionnaires answers into the analysis tables.
+	logan/manage.py reload_warehouse
+
+update-migrations: ## Update the database migrations.
+	logan/manage.py makemigrations
+
+create-data-migration: ## Create a new, empty data migration.
+	logan/manage.py makemigrations --empty $(APP)
+
+reset-migrations: delete-migrations build-initial-migrations ## Delete all migrations and re-create the initial migrations.
+
+# Backup rules ------------------------------------------------------------------------------------
+backup-databases: ## Backup the databases.
+	logan/manage.py backup_databases
+
+# Testing / Linting rules -------------------------------------------------------------------------
+check: check-safety check-bandit check-pylint check-isort check-docs-links check-docs-spelling ## Run the check jobs (safety, style, docs).
+
+mkdir-build:
+	@mkdir build 2>/dev/null || true
+
+pytest: | mkdir-build ## Run the test suite.
+	pytest -c config/pytest.conf --cov --cov-config=config/coverage.conf --cov-report=term-missing -vv runtests.py tests
+	coverage combine --rcfile=config/coverage.conf --append || true
+	coverage html --rcfile=config/coverage.conf
+
+check-safety: ## Run safety on the dependencies.
+	safety check --full-report
+
+check-bandit: ## Run bandit on the code.
+	bandit -r logan
+
+check-pylint: ## Run pylint on the code.
+	pylint --rcfile=config/pylint.conf logan tests
+
+isort: ## Run isort (write files) on the code.
+	isort --settings-path=config --apply --recursive logan tests
+
+check-isort: ## Run isort check on the code.
+	isort --settings-path=config --check-only --recursive logan tests
+
+check-docs-links: build-docs ## Check the documentation (spelling, URLs).
+	sphinx-build -b linkcheck -w /dev/null docs dist/docs
+
+check-docs-spelling: build-docs ## Check the documentation (spelling, URLs).
+	SPELLCHECK=1 sphinx-build -b spelling -w /dev/null docs dist/docs
+
+# CLean rules -------------------------------------------------------------------------------------
+delete-migrations: ## Delete the migrations.
+	@rm -rf logan/logan/migrations
+
+# Usage rules -------------------------------------------------------------------------------------
+help: ## Print this help.
+	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST) | sort

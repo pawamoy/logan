@@ -1,0 +1,4 @@
+nginx-access.log
+.idea/
+*.py[cod]
+__pycache__/
