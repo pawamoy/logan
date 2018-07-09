@@ -1,0 +1,33 @@
+{% extends "logan/base.html" %}
+{% load static %}
+
+{% block content %}
+
+  <h1>My Analyses</h1>
+
+  {% if my_analyses %}
+    <ul class="list-group">
+      {% for analysis in my_analyses %}
+        <li class="list-group-item">
+          <a href="{% url "analysis" analysis.id %}">{{ analysis }}</a>
+          {% if analysis.description %}<p>{{ analysis.description }}</p>{% endif %}
+        </li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+
+  <hr>
+  <h1>Public Analyses</h1>
+
+  {% if public_analyses %}
+    <ul class="list-group">
+      {% for analysis in public_analyses %}
+        <li class="list-group-item">
+          <a href="{% url "analysis" analysis.id %}">{{ analysis }}</a>
+          {% if analysis.description %}<p>{{ analysis.description }}</p>{% endif %}
+        </li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+
+{% endblock content %}

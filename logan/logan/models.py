@@ -1,5 +1,5 @@
 import json
-from datetime import datetime
+from datetime import datetime, timedelta
 from collections import defaultdict
 
 from django.conf import settings
@@ -22,7 +22,8 @@ class Analysis(models.Model):
 
     author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     visibility = models.CharField(
-        verbose_name=_("Visibility"), max_length=30, choices=Visibility.CHOICES
+        verbose_name=_("Visibility"), max_length=30, choices=Visibility.CHOICES,
+        default=Visibility.PRIVATE
     )
     title = models.CharField(verbose_name=_("Title"), max_length=255)
     description = models.TextField(verbose_name=_("Description"), blank=True)
@@ -54,14 +55,19 @@ class Analysis(models.Model):
             ip_dict[item.client_ip_address].append(item)
 
         links = []
+        delta = timedelta(seconds=6)
         for k in ip_dict.keys():
             for i, request_i in enumerate(ip_dict[k][:-1]):
-                links.append(
-                    {
-                        "source": references[request_i],
-                        "target": references[ip_dict[k][i + 1]],
-                    }
-                )
+
+                request_j = ip_dict[k][i + 1]
+                if request_j.datetime - request_i.datetime <= delta:
+
+                    links.append(
+                        {
+                            "source": references[request_i],
+                            "target": references[ip_dict[k][i + 1]],
+                        }
+                    )
                 # for j, request_j in enumerate(ip_dict[k][i+1:], i+1):
                 #     try:
                 #         if request_j.referrer.split('/', 3)[3] == request_i.url.lstrip('/'):

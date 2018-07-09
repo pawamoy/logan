@@ -24,6 +24,7 @@ services:
       - ./docker/services/nginx/development/conf.d:/etc/nginx/conf.d
       - media:/opt/services/djangoapp/media
       - static:/opt/services/djangoapp/static
+      - ./logan/static/logan:/opt/services/djangoapp/static/logan
     networks:
       - web_network
     depends_on:

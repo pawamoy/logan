@@ -1,0 +1,21 @@
+{% extends "logan/base.html" %}
+{% load static %}
+
+{% block content %}
+
+  <h1>{{ user.username }}</h1>
+
+  <h2>Analyses</h2>
+
+  {% if analyses %}
+    <ul class="list-group">
+      {% for analysis in analyses %}
+        <li class="list-group-item">
+          <a href="{% url "analysis" analysis.id %}">{{ analysis }}</a> ({{ analysis.get_visibility_display }})
+          {% if analysis.description %}<p>{{ analysis.description }}</p>{% endif %}
+        </li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+
+{% endblock content %}
