@@ -6,4 +6,4 @@ from .models import Analysis
 
 def analysis(request, id):
     analysis_object = get_object_or_404(Analysis, id=id)
-    return render(request, 'logan/analysis.html', dict(analysis=analysis_object))
+    return render(request, "logan/analysis.html", dict(analysis=analysis_object))
