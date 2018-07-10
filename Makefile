@@ -11,19 +11,19 @@ DOCKER_COMPOSE := docker-compose
 COMPOSE_FILE := docker-compose.yml
 
 #ifdef GITLAB_CI
-#  DJANGO_SETTINGS_MODULE := app.settings.ci
+#  DJANGO_SETTINGS_MODULE := logan.settings.ci
 #else
-#  ifndef HOSTNAME
-#    HOSTNAME := $(shell hostname)
-#  endif
+  ifndef HOSTNAME
+    HOSTNAME := $(shell hostname)
+  endif
 #  ifeq ($(HOSTNAME), logan)
-#    DJANGO_SETTINGS_MODULE := app.settings.prod
+#    DJANGO_SETTINGS_MODULE := logan.settings.prod
 #    COMPOSE_FILE := compose-production.yml
 #  else ifeq ($(HOSTNAME), logan-staging)
-#    DJANGO_SETTINGS_MODULE := app.settings.staging
+#    DJANGO_SETTINGS_MODULE := logan.settings.staging
 #    COMPOSE_FILE := compose-staging.yml
 #  else
-#    DJANGO_SETTINGS_MODULE := app.settings.local
+#    DJANGO_SETTINGS_MODULE := logan.settings.local
 #    COMPOSE_FILE := compose-development.yml
 #  endif
 #endif
@@ -41,10 +41,10 @@ export DOCKER0_ADDRESS
 
 # Information -------------------------------------------------------------------------------------
 $(info ----------------------------------------------------)
-$(info HOSTNAME                = ${HOSTNAME})
-$(info COMPOSE_FILE            = ${COMPOSE_FILE})
-$(info DOCKER0_ADDRESS         = ${DOCKER0_ADDRESS})
-$(info DJANGO_SETTINGS_MODULE  = ${DJANGO_SETTINGS_MODULE})
+$(info HOSTNAME                = $(HOSTNAME))
+$(info COMPOSE_FILE            = $(COMPOSE_FILE))
+$(info DOCKER0_ADDRESS         = $(DOCKER0_ADDRESS))
+$(info DJANGO_SETTINGS_MODULE  = $(DJANGO_SETTINGS_MODULE))
 $(info ----------------------------------------------------)
 $(info )
 
