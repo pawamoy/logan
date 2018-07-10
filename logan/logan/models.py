@@ -49,9 +49,26 @@ class Analysis(models.Model):
         references = dict()
         nodes = list()
         ip_dict = defaultdict(list)
+        node_type = dict(
+            GET="circle",
+            POST="square",
+            PUT="square",
+            PATCH="square",
+            HEAD="triangle-up",
+            OPTIONS="triangle-down",
+            DELETE="cross",
+            CONNECT="diamond",
+            TRACE="diamond",
+        )
         for ref, item in enumerate(queryset.order_by("datetime")):
             references[item] = ref
-            nodes.append({"size": 50, "score": 1, "id": item.request, "type": "circle"})
+            node_dict = dict(
+                size=max(20, min(200, item.bytes_sent / 500)),
+                score=item.status_code,
+                id=item.request,
+                type=node_type.get(item.verb)
+            )
+            nodes.append(node_dict)
             ip_dict[item.client_ip_address].append(item)
 
         links = []

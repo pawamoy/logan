@@ -27,12 +27,10 @@
 
 {% block content %}
 
-  <h1>{{ analysis.title }}</h1>
-  {% if analysis.description %}<p>{{ analysis.description }}</p>{% endif %}
-
   <div class="row">
 
     <div class="col-9">
+      <h1>{{ analysis.title }}</h1>
       <div class="card" id="analysis_{{ analysis.id }}"></div>
     </div>
 
@@ -44,27 +42,93 @@
       <br>
       <span class="badge badge-secondary">Modified</span> {{ analysis.modified }}
 
-      <form method="post" action="{% url "analysis" analysis.id %}">
+      {% if form %}
 
-        {% csrf_token %}
-        <hr>
+        <form method="post" action="{% url "analysis" analysis.id %}">
 
-        {% for field in form %}
-          <div class="form-group">
-            {{ field.label_tag }}
-            {{ field }}
-          </div>
-        {% endfor %}
+          {% csrf_token %}
+          <hr>
 
-        <button type="submit" class="btn btn-primary">Submit</button>
+          {% for field in form %}
+            <div class="form-group">
+              {{ field.label_tag }}
+              {{ field }}
+            </div>
+          {% endfor %}
 
-{#        <div class="form-group">#}
-{#          <label for="inputTitle">Title</label>#}
-{#          <input type="text" class="form-control" id="inputTitle" aria-describedby="titleHelp" placeholder="Enter title">#}
-{#          <small id="emailHelp" class="form-text text-muted">We'll never share your email with anyone else.</small>#}
-{#        </div>#}
+          <button type="submit" class="btn btn-primary">Submit</button>
 
-      </form>
+{#          <div class="form-group">#}
+{#            <label for="inputTitle">Title</label>#}
+{#            <input type="text" class="form-control" id="inputTitle" aria-describedby="titleHelp" placeholder="Enter title">#}
+{#            <small id="emailHelp" class="form-text text-muted">We'll never share your email with anyone else.</small>#}
+{#          </div>#}
+
+        </form>
+
+      {% else %}
+
+        <br>
+        <span class="badge badge-secondary">Visibility</span> {{ analysis.get_visibility_display }}
+
+        {% if analysis.description %}
+          <hr>
+          <p>{{ analysis.description|linebreaksbr }}</p>
+        {% endif %}
+
+      {% endif %}
+
+      <hr>
+      <details>
+        <summary>Legend</summary>
+        <p>The <em>size</em> represents the number of bytes in the response sent by the server.</p>
+        <p>The <em>color</em> varies according to the status code of the request. 100: purple, 350: blue, 600: turquoise.</p>
+        <p>The <em>shape</em> represents the HTTP verb used.</p>
+        <table class="table table-condensed">
+          <tbody>
+            <tr><td>Circle</td><td>GET</td></tr>
+            <tr><td>Square</td><td>POST, PUT, PATCH</td></tr>
+            <tr><td>Triangle Up</td><td>HEAD</td></tr>
+            <tr><td>Triangle Down</td><td>OPTIONS</td></tr>
+            <tr><td>Cross</td><td>DELETE</td></tr>
+            <tr><td>Diamond</td><td>CONNECT, TRACE</td></tr>
+          </tbody>
+        </table>
+      </details>
+
+      <hr>
+      <details>
+      <summary>Interactive keys</summary>
+        <p>Show/hide orphan nodes: <code>0</code></p>
+        <p>Show/hide shape</p>
+        <table class="table table-condensed">
+          <tbody>
+            <tr><td>Circle</td><td><code>c</code></td></tr>
+            <tr><td>Triangle Down</td><td><code>d</code></td></tr>
+            <tr><td>Diamond</td><td><code>r</code></td></tr>
+            <tr><td>Square</td><td><code>s</code></td></tr>
+            <tr><td>Triangle Up</td><td><code>t</code></td></tr>
+            <tr><td>Cross</td><td><code>x</code></td></tr>
+          </tbody>
+        </table>
+        <p>Show/hide status codes</p>
+        <table class="table table-condensed">
+          <tbody>
+            <tr><td>Low: 100-300</td><td><code>l</code></td></tr>
+            <tr><td>Medium: 300-400</td><td><code>m</code></td></tr>
+            <tr><td>High: 400-600</td><td><code>h</code></td></tr>
+          </tbody>
+        </table>
+        {#<p>Filter by edge score</p>#}
+        {#<table>#}
+        {#  <tbody>#}
+        {#    <tr><td>Low</td><td><code>1</code></td></tr>#}
+        {#    <tr><td>Medium</td><td><code>2</code></td></tr>#}
+        {#    <tr><td>High</td><td><code>3</code></td></tr>#}
+        {#  </tbody>#}
+        {#</table>#}
+      </details>
+
 
     </div>
 
@@ -87,7 +151,7 @@
         keyd = true,
         keyl = true,
         keym = true,
-        keyh = false,
+        keyh = true,
         key1 = true,
         key2 = true,
         key3 = true,
@@ -99,8 +163,8 @@
       var text_center = false;
       var outline = false;
 
-      var min_score = 0;
-      var max_score = 1;
+      var min_score = 100;
+      var max_score = 600;
 
       var color = d3.scale.linear()
         .domain([min_score, (min_score + max_score) / 2, max_score])
@@ -127,8 +191,8 @@
       var nominal_stroke = 1.5;
       var max_stroke = 4.5;
       var max_base_node_size = 36;
-      var min_zoom = 0.2;
-      var max_zoom = 3;
+      var min_zoom = 0.1;
+      var max_zoom = 5;
       var svg = d3.select("#analysis_{{ analysis.id }}").append("svg");
       var zoom = d3.behavior.zoom().scaleExtent([min_zoom, max_zoom]);
       var g = svg.append("g");
@@ -486,9 +550,9 @@
 
       function vis_by_node_score(score) {
         if (isNumber(score)) {
-          if (score >= 0.666) return keyh;
-          else if (score >= 0.333) return keym;
-          else if (score >= 0) return keyl;
+          if (score >= 400) return keyh;
+          else if (score >= 300) return keym;
+          else if (score >= 100) return keyl;
         }
         return true;
       }

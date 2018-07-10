@@ -11,6 +11,10 @@ class AnalysisForm(forms.ModelForm):
         self.fields["description"].widget.attrs["placeholder"] = "Enter description"
         self.fields["description"].widget.attrs["placeholder"] = "Enter description"
 
+    def make_read_only(self):
+        for field in self.fields.values():
+            field.widget.attrs["readonly"] = True
+
     class Meta:
         model = Analysis
         fields = [
