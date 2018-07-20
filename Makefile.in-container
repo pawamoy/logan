@@ -20,11 +20,7 @@ python: ## Launch a Python shell in the djangoapp container.
 
 # Updating rules ----------------------------------------------------------------------------------
 load-fixtures: ## Install the fixtures in the database.
-	./scripts/delete_content_types
 	./scripts/load_fixtures
-
-load-warehouse: ## Reload the questionnaires answers into the analysis tables.
-	logan/manage.py reload_warehouse
 
 update-migrations: ## Update the database migrations.
 	logan/manage.py makemigrations

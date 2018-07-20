@@ -94,9 +94,6 @@ load-static-files: delete-django-image delete-static-volume build-django ## Coll
 load-fixtures: ## Install the fixtures in the database.
 	@$(MAKE_IN) load-fixtures
 
-load-warehouse: ## Reload the questionnaires answers into the analysis tables.
-	@$(MAKE_IN) load-warehouse
-
 update-migrations: ## Update the database migrations.
 	@$(MAKE_IN) update-migrations
 

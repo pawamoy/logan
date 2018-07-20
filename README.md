@@ -16,19 +16,21 @@ Clone the repository with `git clone git@gitlab.com:pawamoy/logan`.
 
 ## Building
 This project is executed through Docker.
-Run `make build` to build the Docker images,
-then `make build-database` to initialize the database.
-You can also make yourself a super-user with `make build-superuser`.
+Run the whole building process by typing `make` or `make all`,
+or follow the step-by-step build below:
+
+1. `make build` to build the Docker images;
+2. `make up-no-start` to initialize the containers.
+    It will actually create the database in the volume, which
+    is necessary before trying to connect to the database in the next step;
+3. `make build-database` to initialize the database (create the tables);
+4. `make build-superuser` to create a super-user within the application;
+5. See [Loading fixtures](#loading-fixtures) and [Running](#running) sections.
 
 ## Loading fixtures
 Copy your NginX logs file in the repository.
 The file must be named `nginx-access.log`.
-Then run `make python` to get access to a Python shell inside a container.
-Execute the following commands to parse and insert the logs in the database:
-```python
-from meerkat.models import RequestLog
-RequestLog.parse_all()
-```
+Now run `make load-fixtures` to load the logs into the database.
 
 ## Running
 To run the project, use the `make up` command.

@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+
+./logan/manage.py shell --plain -v 0 --no-color <<EOF
+from meerkat.models import RequestLog
+RequestLog.parse_all()
+EOF
